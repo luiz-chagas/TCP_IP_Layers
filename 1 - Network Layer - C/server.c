@@ -126,7 +126,7 @@ int main(int argc, char **argv)
                 len = read(client_socket, buffer, frame_size);
                 fwrite(buffer, sizeof(char), len, received_frame);
                 remain_data -= len;
-                fprintf(stdout, "Received %d bytes and we expect to receive : %d bytes\n", (int) len, remain_data);
+                fprintf(stdout, "Server received %d bytes.\n", (int) len);
             }
             fclose(received_frame);
             close(client_socket);
