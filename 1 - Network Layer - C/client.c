@@ -18,14 +18,28 @@ struct Frame{
     unsigned char type[2];// type of protocol - 0x0800 for IPv4
     // DATA
     unsigned char data[494]; // 494 bytes limit for data
-    unsigned char padding[494]; // for making Frame 512 bytes long
+    //unsigned char padding[494]; // for making Frame 512 bytes long
     // FOOTER
     unsigned char checksum[4];
 };
 
-void prepareFrame(char destinationIP[16], char message[494], struct Frame *frame){
-    // strcpy(frame->destination,'123123123');// get MAC address from IP
-    // strcpy(frame->data,message);
+void prepareFrame(struct Frame *frame, char *message){
+    // strcpy(frame->source, "\x01\x02\x03\x04\x05\x06");
+    // strcpy(frame->destination, "\x11\x12\x13\x14\x15\x16");
+    // strcpy(frame->type, "\x08\x00");
+    // sprintf(frame->data, "%s", message);
+    // strcpy(frame->checksum, "\x00\x20\x20\x3a");
+    strcpy(frame->source, "SOURCE");
+    strcpy(frame->destination, "DESTIN");
+    strcpy(frame->type, "TP");
+    //ESCOLHER 1 -----
+    //OPCAO 1
+    sprintf(frame->data, "%-494s", message);
+    //OPCAO 2
+    memset(frame->data, 0, 494);
+    sprintf(frame->data, "%s", message);
+    //-----------------
+    strcpy(frame->checksum, "CHCK");
 }
 
 void sendFrame(struct Frame *frame, int socket){
@@ -38,15 +52,16 @@ void sendFrame(struct Frame *frame, int socket){
 
 int main(int argc, char **argv)
 {
-        ssize_t len;
+        ssize_t len, sent_bytes;
         char buffer[512];
         int frame_size = 512;
-        int sent_bytes = 0;
         int remain_data = 0;
         char *message;
+        char *ip;
         int port_number;
         int client_socket;
         struct sockaddr_in remote_addr;
+        struct Frame frame1;
 
         if(argc != 4){
           fprintf(stderr, "Usage: client message ip port\n");
@@ -54,7 +69,7 @@ int main(int argc, char **argv)
         }
 
         message = argv[1];
-
+        ip = argv[2];
         port_number = atoi(argv[3]);
 
         /* Zeroing remote_addr struct */
@@ -97,45 +112,18 @@ int main(int argc, char **argv)
             fprintf(stdout, "TMQ negotiated --> %d bytes\n", frame_size);
         }
 
-        // /* Receiving file size */
-        // int n = read(client_socket, buffer, 256);
-        // printf("Read %d bytes for size\n",n);
-        // file_size = atoi(buffer);
-        // fprintf(stdout, "File size : %d\n", file_size);
-
-        // received_file = fopen(filename, "w");
-        // if (received_file == NULL)
-        // {
-        //         fprintf(stderr, "Failed to open file foo --> %s\n", strerror(errno));
-        //         exit(EXIT_FAILURE);
-        // }
-        //
-        // remain_data = file_size;
-        //
-        // bzero(buffer,256);
-        //
-        // while (remain_data > 0)
-        // {
-        //         len = read(client_socket, buffer, 256);
-        //         fwrite(buffer, sizeof(char), len, received_file);
-        //         remain_data -= len;
-        //         fprintf(stdout, "Received %d bytes and we hope to receive : %d bytes\n", (int) len, remain_data);
-        //         if(len == 0){
-        //           close(client_socket);
-        //           exit(EXIT_FAILURE);
-        //         }
-        // }
-        // fclose(received_file);
-
         /* Sending frame */
-        remain_data = 512;
+        remain_data = frame_size;
 
-        // while (remain_data > 0)
-        // {
-        //     sent_bytes = send(client_socket, message, NULL, 512);
-        //     remain_data -= sent_bytes;
-        //     fprintf(stdout, "1. Server sent %d bytes from file's data, remaining data = %d\n", sent_bytes, remain_data);
-        // }
+        //Prepare Frame
+        prepareFrame(&frame1, message);
+
+        while (remain_data > 0)
+        {
+             sent_bytes = send(client_socket, &frame1, 512, NULL);
+             remain_data -= sent_bytes;
+             fprintf(stdout, "Client sent %d bytes to the server, remaining data = %d\n", sent_bytes, remain_data);
+        }
 
         close(client_socket);
 

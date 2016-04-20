@@ -95,21 +95,6 @@ int main(int argc, char **argv)
             }
             fprintf(stdout, "Accept client --> %s\n", inet_ntoa(client_addr.sin_addr));
 
-            //sprintf(file_size, "%d", (int) file_stat.st_size);
-
-            // /* Sending file size */
-            // len = send(client_socket, file_size, sizeof(file_size), 0);
-            // if (len < 0)
-            // {
-            //       fprintf(stderr, "Error on sending greetings --> %s", strerror(errno));
-            //       exit(EXIT_FAILURE);
-            // }
-
-            //fprintf(stdout, "Server sent %d bytes for the size\n", (int) len);
-
-            //offset = 0;
-            //remain_data = file_stat.st_size;
-
             // /* Sending file data */
             // while (remain_data > 0)
             // {
@@ -136,13 +121,13 @@ int main(int argc, char **argv)
 
             bzero(buffer, frame_size);
 
-            // while (remain_data > 0)
-            // {
-            //     len = read(client_socket, buffer, frame_size);
-            //     fwrite(buffer, sizeof(char), len, received_frame);
-            //     remain_data -= len;
-            //     fprintf(stdout, "Received %d bytes and we expect to receive : %d bytes\n", (int) len, remain_data);
-            // }
+            while (remain_data > 0)
+            {
+                len = read(client_socket, buffer, frame_size);
+                fwrite(buffer, sizeof(char), len, received_frame);
+                remain_data -= len;
+                fprintf(stdout, "Received %d bytes and we expect to receive : %d bytes\n", (int) len, remain_data);
+            }
             fclose(received_frame);
             close(client_socket);
         }
