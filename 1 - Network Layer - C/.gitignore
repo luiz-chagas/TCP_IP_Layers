@@ -1,2 +1,4 @@
-\!*.c
-!.c
+*
+!server.c
+!client.c
+!.gitignore
