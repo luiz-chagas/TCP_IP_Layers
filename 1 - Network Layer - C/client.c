@@ -102,21 +102,26 @@ int main(int argc, char **argv)
             fprintf(stdout, "TMQ negotiated --> %d bytes\n", frame_size);
         }
 
-        if(strlen(message)>512){
-            int i = 0;
-            while(i+512 < strlen(message)){
-                //Prepare Frame
-                prepareFrame(&frame1, message);
-                //Send Frame
-                sendFrame(&frame1, client_socket, frame_size);
-                i += 512;
-            }
-        }else{
-            //Prepare Frame
-            prepareFrame(&frame1, message);
-            //Send Frame
-            sendFrame(&frame1, client_socket, frame_size);
-        }
+        //I'm not going to deal with messages over 512 bytes
+        // if(strlen(message)>512){
+        //     int i = 0;
+        //     while(i+512 < strlen(message)){
+        //         //Prepare Frame
+        //         prepareFrame(&frame1, message);
+        //         //Send Frame
+        //         sendFrame(&frame1, client_socket, frame_size);
+        //         i += 512;
+        //     }
+        // }else{
+        //     //Prepare Frame
+        //     prepareFrame(&frame1, message);
+        //     //Send Frame
+        //     sendFrame(&frame1, client_socket, frame_size);
+        // }
+        //Prepare Frame
+        prepareFrame(&frame1, message);
+        //Send Frame
+        sendFrame(&frame1, client_socket, frame_size);
 
         close(client_socket);
 
