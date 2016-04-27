@@ -25,6 +25,8 @@ int main(int argc, char **argv)
         int remain_data;
         int port_number;
         char buffer[512];
+        char filename[18];
+        int i = 0;
 
         if(argc != 2){
           fprintf(stderr, "Usage: server port_number\n");
@@ -68,22 +70,6 @@ int main(int argc, char **argv)
             fprintf(stdout, "Server is now listening on port %d.\n",port_number);
         }
 
-        // fd = open(file_to_send, O_RDONLY);
-        // if (fd == -1)
-        // {
-        //         fprintf(stderr, "Error opening file --> %s", strerror(errno));
-        //         exit(EXIT_FAILURE);
-        // }
-
-        // /* Get file stats */
-        // if (fstat(fd, &file_stat) < 0)
-        // {
-        //         fprintf(stderr, "Error fstat --> %s", strerror(errno));
-        //         exit(EXIT_FAILURE);
-        // }
-
-        //fprintf(stdout, "File Size: \n%d bytes\n", (int) file_stat.st_size);
-
         sock_len = sizeof(struct sockaddr_in);
         /* Accepting incoming clients */
         while(1){
@@ -95,14 +81,6 @@ int main(int argc, char **argv)
             }
             fprintf(stdout, "Accept client --> %s\n", inet_ntoa(client_addr.sin_addr));
 
-            // /* Sending file data */
-            // while (remain_data > 0)
-            // {
-            //         sent_bytes = sendfile(client_socket, fd, NULL, 256);
-            //         remain_data -= sent_bytes;
-            //         fprintf(stdout, "1. Server sent %d bytes from file's data, offset is now : %d and remaining data = %d\n", sent_bytes, offset, remain_data);
-            // }
-
             // Receiving frame size
             int n = read(client_socket, buffer, sizeof(buffer));
             printf("Read %d bytes from client\n",n);
@@ -110,7 +88,8 @@ int main(int argc, char **argv)
             fprintf(stdout, "TMQ Negotiated --> %d bytes\n", frame_size);
 
             // Receiving frame
-            received_frame = fopen("ReceivedFrame", "w");
+            sprintf(filename, "ReceivedFrame%05d",i++);
+            received_frame = fopen(filename, "w");
             if (received_frame == NULL)
             {
                 fprintf(stderr, "Failed to open file foo --> %s\n", strerror(errno));

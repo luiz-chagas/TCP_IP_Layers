@@ -18,44 +18,34 @@ struct Frame{
     unsigned char type[2];// type of protocol - 0x0800 for IPv4
     // DATA
     unsigned char data[494]; // 494 bytes limit for data
-    //unsigned char padding[494]; // for making Frame 512 bytes long
     // FOOTER
     unsigned char checksum[4];
 };
 
 void prepareFrame(struct Frame *frame, char *message){
-    // strcpy(frame->source, "\x01\x02\x03\x04\x05\x06");
-    // strcpy(frame->destination, "\x11\x12\x13\x14\x15\x16");
-    // strcpy(frame->type, "\x08\x00");
-    // sprintf(frame->data, "%s", message);
-    // strcpy(frame->checksum, "\x00\x20\x20\x3a");
-    strcpy(frame->source, "SOURCE");
-    strcpy(frame->destination, "DESTIN");
-    strcpy(frame->type, "TP");
-    //ESCOLHER 1 -----
-    //OPCAO 1
+    strcpy(frame->source, "\x01\x02\x03\x04\x05\x06");
+    strcpy(frame->destination, "\x11\x12\x13\x14\x15\x16");
+    strcpy(frame->type, "\x08\x00");
     sprintf(frame->data, "%-494s", message);
-    //OPCAO 2
-    memset(frame->data, 0, 494);
-    sprintf(frame->data, "%s", message);
-    //-----------------
-    strcpy(frame->checksum, "CHCK");
+    strcpy(frame->checksum, "\x00\x20\x20\x3a");
 }
 
-void sendFrame(struct Frame *frame, int socket){
-    // if (send(socket, *frame, 512, 0) < 0) // returns -1 if error
-    // {
-    //     fprintf(stderr, "Error on sending Frame --> %s", strerror(errno));
-    //     exit(EXIT_FAILURE);
-    // }
+void sendFrame(struct Frame *frame, int socket, ssize_t frame_size){
+    ssize_t sent_bytes;
+    int remain_data = (int) frame_size;
+    while (remain_data > 0)
+    {
+         sent_bytes = send(socket, frame, frame_size, 0);
+         remain_data -= sent_bytes;
+         fprintf(stdout, "Client sent %d bytes to the server, remaining data = %d\n", (int) sent_bytes, remain_data);
+    }
 }
 
 int main(int argc, char **argv)
 {
-        ssize_t len, sent_bytes;
+        ssize_t len;
         char buffer[512];
         int frame_size = 512;
-        int remain_data = 0;
         char *message;
         char *ip;
         int port_number;
@@ -112,17 +102,20 @@ int main(int argc, char **argv)
             fprintf(stdout, "TMQ negotiated --> %d bytes\n", frame_size);
         }
 
-        /* Sending frame */
-        remain_data = frame_size;
-
-        //Prepare Frame
-        prepareFrame(&frame1, message);
-
-        while (remain_data > 0)
-        {
-             sent_bytes = send(client_socket, &frame1, 512, NULL);
-             remain_data -= sent_bytes;
-             fprintf(stdout, "Client sent %d bytes to the server, remaining data = %d\n", sent_bytes, remain_data);
+        if(strlen(message)>512){
+            int i = 0;
+            while(i+512 < strlen(message)){
+                //Prepare Frame
+                prepareFrame(&frame1, message);
+                //Send Frame
+                sendFrame(&frame1, client_socket, frame_size);
+                i += 512;
+            }
+        }else{
+            //Prepare Frame
+            prepareFrame(&frame1, message);
+            //Send Frame
+            sendFrame(&frame1, client_socket, frame_size);
         }
 
         close(client_socket);
