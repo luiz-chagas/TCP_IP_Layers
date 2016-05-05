@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 	}
 
 	ifindex = ifr.ifr_ifindex;
-		/*retrieve corresponding MAC*/
+	/*retrieve corresponding MAC*/
 	if (ioctl(client_socket, SIOCGIFHWADDR, &ifr) == -1) {
 		perror("SIOCGIFHWADDR");
 		exit(1);
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
 		fprintf(stdout, "Connection to server established on port %d.\n", port_number);
 	}
 
-		/* Sending frame size */
+	/* Sending frame size */
 	sprintf(buffer, "%d", frame_size);
 	len = send(client_socket, buffer, sizeof(buffer), 0);
 	if (len < 0) {
@@ -162,17 +162,19 @@ int main(int argc, char **argv) {
 	}
 	else{
 		while(!feof(p)){
+            i = 0;
 			while (!feof(p) && i<494) {
 				c[0] = getc(p);
-				out[i] = c[0];
-				i++;
+                if(c[0] != EOF){
+                    out[i] = c[0];
+    				i++;
+                }
 			}
 			message = out;
 			//Prepare Frame
 			prepareFrame(&frame1, message, src_mac, dst_mac);
 			//Send Frame
 			sendFrame(&frame1, client_socket, frame_size);
-			i=0;
 		}
 		fclose(p);
 	}
