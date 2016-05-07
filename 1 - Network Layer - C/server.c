@@ -23,16 +23,18 @@ int main(int argc, char **argv){
 	int frame_size;
 	FILE *received_frame;
 	int port_number;
+    char *ip;
 	char buffer[512];
 	char filename[18];
 	int i = 0;
 
 	if(argc != 2){
-		fprintf(stderr, "Usage: server port_number\n");
+		fprintf(stderr, "Usage: server ip port_number\n");
 		exit(EXIT_FAILURE);
 	}
 
-	port_number = atoi(argv[1]);
+    ip = argv[1];
+	port_number = atoi(argv[2]);
 
 	/* Create server socket */
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -48,7 +50,7 @@ int main(int argc, char **argv){
 
 	/* Construct server_addr struct */
 	server_addr.sin_family = AF_INET;
-	inet_pton(AF_INET, "127.0.0.1", &(server_addr.sin_addr));
+	inet_pton(AF_INET, ip, &(server_addr.sin_addr));
 	server_addr.sin_port = htons(port_number);
 
 	/* Bind */

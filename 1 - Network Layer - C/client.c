@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
 	char out[494];
 	char c[1];
 	if(argc != 4){
-		fprintf(stderr, "Usage: client message ip port\n");
+		fprintf(stderr, "Usage: client filepath ip port\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 
 	/* Construct remote_addr struct */
 	remote_addr.sin_family = AF_INET;
-	inet_pton(AF_INET, "127.0.0.1", &(remote_addr.sin_addr));
+	inet_pton(AF_INET, ip, &(remote_addr.sin_addr));
 	remote_addr.sin_port = htons(port_number);
 
 	/* Create client socket */
