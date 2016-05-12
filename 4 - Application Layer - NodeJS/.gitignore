@@ -1,5 +1,7 @@
 *
 !.gitignore
 !server.js
-!www/index.html
-!node_modules/*
+!/www/
+!/www/index.html
+!/node_modules/
+!/node_modules/**
