@@ -2,6 +2,6 @@
 !.gitignore
 !server.js
 !/www/
+/www/*
 !/www/index.html
 !/node_modules/
-!/node_modules/**
