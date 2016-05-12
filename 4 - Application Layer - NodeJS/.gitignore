@@ -1,2 +1,5 @@
 *
 !.gitignore
+!server.js
+!www/index.html
+!node_modules/*
