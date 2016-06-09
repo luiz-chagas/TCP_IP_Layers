@@ -3,5 +3,5 @@
 !server.js
 !client.js
 !index.html
-!/node_modules/
-!/node_modules/*/*
+!node_modules/
+!node_modules/*
