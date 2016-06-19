@@ -1,0 +1,88 @@
+<?php
+ 
+class Pacote {
+	public $portaOrigem = "00000000000000000"; //16
+	public $portaDestino = "00000000000000000"; //16
+	public $sequencia = "0000000000000000000000000000000000"; //32
+	public $ack = "0000000000000000000000000000000000"; //32
+	public $offset = "0000"; //4
+	public $reservado = "000000"; //6
+	public $flags = "000000"; //6
+	public $janela = "00000000000000000"; //16
+	public $checksum = "00000000000000000"; //16
+	public $urgente = "00000000000000000"; //16
+	public $opcoes;
+	public $padding;
+	public $dado;
+	
+	public function set($origem, $destino, $flag, $dados) {
+		$this->setPortaOrigem($origem);
+		$this->setPortaDestino($destino);
+		$this->setDado($dados);
+		if($flag == "SYN") $this->setFlags("000010");
+		if($flag == "ACK") $this->setFlags("010000");
+		if($flag == "FIN") $this->setFlags("000001");
+	}
+	
+	public function convert($resposta) {
+		$portaOrigem = substr($resposta, 0, 16);
+		$portaDestino = substr($resposta, 16, 16);
+		$sequencia = substr($resposta, 32, 32);
+		$ack = substr($resposta, 64, 32);
+		$offset = substr($resposta, 96, 4);
+		$reservado = substr($resposta, 100, 6);
+		$flags = substr($resposta, 106, 6);
+		$janela = substr($resposta, 112, 16);
+		$checksum = substr($resposta, 128, 16);
+		$urgente = substr($resposta, 144, 16);
+		$dado = substr($resposta, 224);
+	}
+	
+	public function toString() {
+		return "";
+	}
+	
+	public function setPortaOrigem($newval) {
+    	$this->portaOrigem = $newval;
+	}
+	public function setPortaDestino($newval) {
+    	$this->portaDestino = $newval;
+	}
+	public function setSequencia($newval) {
+    	$this->sequencia = $newval;
+	}
+	public function setAck($newval) {
+    	$this->ack = $newval;
+	}
+	public function setOffset($newval) {
+    	$this->offset = $newval;
+	}
+	public function setReservado($newval) {
+    	$this->reservado = $newval;
+	}
+	public function setFlags($flag) {
+		if($flag == "SYN") $this->flags = 000010;
+		if($flag == "ACK") $this->flags = 010000;
+		if($flag == "FIN") $this->flags = 000001;
+	}
+	public function setJanela($newval) {
+    	$this->janela = $newval;
+	}
+	public function setChecksum($newval) {
+    	$this->checksum = $newval;
+	}
+	public function setUrgente($newval) {
+    	$this->urgente = $newval;
+	}
+	public function setOpcoes($newval) {
+    	$this->opcoes = $newval;
+	}
+	public function setPadding($newval) {
+    	$this->padding = $newval;
+	}
+	public function setDado($newval) {
+    	$this->dado = $newval;
+	}
+}
+
+?>
