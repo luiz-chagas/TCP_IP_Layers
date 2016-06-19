@@ -4,7 +4,7 @@ require_once("pacote.php");
 	$host = "127.0.0.1";
 	$port = "20000";
 	$hostSend = "127.0.0.1";
-	$portSend = 10000;
+	$portSend = 10001;
 	
 	$socketRecv = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 	$lim_bytes = 1000000000; //1 GB
@@ -23,7 +23,7 @@ require_once("pacote.php");
 			$packetRecv = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
 			$packet = new Pacote;
 			$packet->convert($packetRecv);
-			
+			var_dump($packet);			
 			if($packet->flags == "000010") {
 				$ack = clone $packet;
 				$ack->set($portSend, $port, "ACK", "oi");
@@ -37,7 +37,7 @@ require_once("pacote.php");
 			}
 			
 			//socket para enviar criado com UDP para a funcionalidade ser implementada pela minha função
-			$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_UDP);
+			$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 			if ($socketSend === false) {
 				echo socket_strerror(socket_last_error()) . "\n";
 			} else {
@@ -50,8 +50,9 @@ require_once("pacote.php");
 			} else {
 				echo "Conectado a $hostSend.\n";
 			}
-			socket_write($socketSend, $packet->toString(), strlen($packet->toString()));
-		} while ($packet->flags != "000001");
+			if(socket_write($socketSend, $packet->toString(), strlen($packet->toString())) === false) echo "Erro de envio para aplicação";
+			else echo "Enviado: ".$packet->toString();
+		} while ($packet->flags != "000001" && $packet->flags != "000000");
 
 		socket_close($connection);
 	}

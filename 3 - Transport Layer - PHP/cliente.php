@@ -21,7 +21,7 @@ require_once("pacote.php");
 		$content = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
 
 		//socket para enviar criado com UDP para a funcionalidade ser implementada pela minha função
-		$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_UDP);
+		$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 		if ($socketSend === false) {
 			echo socket_strerror(socket_last_error()) . "\n";
 		} else {
@@ -37,6 +37,7 @@ require_once("pacote.php");
 
 		$pacote = new Pacote;
 		$pacote->set($portSend, $port, "", $content);
+		var_dump($pacote);
 		//usar essa pra UDP
 		bypass($socketSend, $pacote->toString());
 		//usar essa pra TCP
