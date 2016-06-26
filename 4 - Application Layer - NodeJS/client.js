@@ -7,17 +7,22 @@ var PORT = 11001;
 var server = new net.Socket();
 var sock;
 
+var msg = "GET / HTTP/1.1\r\n"
+         + "Host: " + host + ":" + port + "\r\n"
+         + "User-Agent: Grupo 3 (Luiz, Larissa, Raphael)\r\n\r\n";
+
 net.createServer(function(sock) {
     console.log('Client connected: ' + sock.remoteAddress +':'+ sock.remotePort + "\n");
     // Handles user query
     sock.on('data', function(data) {
 
         console.log("[STATUS]Data received from application\n");
-        console.log(data.toString());
+        //console.log(data.toString());
+        console.log(msg.toString());
 
         //Pass data to the server
         server.connect(PORT,HOST,function(){
-            server.write(data + "\n");
+            server.write(msg);
             console.log("[STATUS]Data sent to server\n");
         });
 
