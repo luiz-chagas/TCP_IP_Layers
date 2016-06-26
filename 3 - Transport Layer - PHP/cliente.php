@@ -1,14 +1,14 @@
 <?php
 require_once("pacote.php");
-	
+
 	$host = "127.0.0.1";
-	$port = "10000";
+	$port = "11001";
 	$hostSend = "127.0.0.1";
-	$portSend = 20000;
+	$portSend = 11000;
 
 	$socketRecv = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 	$lim_bytes = 1000000000; //1 GB
-	
+
 	socket_bind($socketRecv, $host, $port);
 	socket_listen($socketRecv, SOMAXCONN);
 
@@ -42,13 +42,13 @@ require_once("pacote.php");
 		bypass($socketSend, $pacote->toString());
 		//usar essa pra TCP
 		//bypass($socketSend, $pacote->toString());
-		
+
 		echo "Transmissão finalizada\n";
 		socket_close($socketSend);
 
 		socket_close($connection);
 	}
-	
+
 	socket_close($socketRecv);
 
 	function bypass($sock, $conteudo) {
@@ -59,12 +59,12 @@ require_once("pacote.php");
 		$syn = new Pacote;
 		$syn->set($portSend, $port, "SYN", "oi");
 		socket_write($socket, $syn->toString(), strlen($syn->toString()));
-		
+
 		$ouvindo = socket_accept($socket);
 		$resposta = socket_read($ouvindo, $lim_bytes, PHP_BINARY_READ);
 		$ackServer = new Pacote;
 		$ackServer->convert($resposta);
-		
+
 		$ack = new Pacote;
 		$ack->set($portSend, $port, "ACK", "oi");
 		socket_write($socket, $ack, strlen($ack));
