@@ -6,50 +6,54 @@
 package networklayer;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Scanner;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
-/**
- *
- * @author rapha
- */
 public class NetworkLayer {
 
-    /**
-     * @param args the command line arguments
-     */
+    public static final int receivePort = 3000;
+    public static final int sendPort = 3001;
+    public static final int portNumber = 3002;
+    public static final String localHost = "127.0.0.1";
+    public static final String physicalLayer = "";
+    
+    
     public static void main(String[] args) {
-
-        /*
         try {
-            ServerSocket servidor = new ServerSocket(3000);
-            Socket cliente = servidor.accept();
-            System.out.println("Nova conexão com o cliente "
-                    + cliente.getInetAddress().getHostAddress()
-            );
+            while (true) {
+                //Abre a tabela de Rotas
+                RouteTable route = new RouteTable();
+                //Ouve porta
+                DatagramSocket ds = new DatagramSocket(receivePort);
+                byte[] msg = new byte[4024]; //Buffer para o dado
+                //recebe e fechar o socket
+                DatagramPacket pkg = new DatagramPacket(msg, msg.length);
+                ds.receive(pkg);
+                ds.close();
+                
+                String gateway = route.compareNetmask(new String(pkg.getData()));
+                if(gateway.equals("RouteNotFound")){
+                    System.out.println(gateway + " - Pacote Descartado");
+                }
+                else if(InetAddress.getLocalHost().getHostAddress().equals(gateway)){
+                    InetAddress addr = InetAddress.getByName(localHost);
+                    msg = pkg.getData();
+                    pkg = new DatagramPacket(msg,msg.length, addr,sendPort);
+                    ds.send(pkg);
+                }
+                else{
+                    Runtime.getRuntime().exec(physicalLayer+" "+msg+" "+gateway+" "+portNumber);
+                }
 
-            Scanner s = new Scanner(cliente.getInputStream());
-            
-            while (s.hasNextLine()) {
-                System.out.println(s.nextLine());
             }
-
-            s.close();
-            servidor.close();
-            cliente.close();
-*/
-            RouteTable route = new RouteTable();
-            //String routes[][]={{"255.255.253","255.255.254"},{"255.255.253","255.255.254"},{"255.255.253","255.255.254"}};
-            //route.createTable(routes);
-            //System.out.println(route.getRoutes()[2][1]);
-            System.out.println(route.compareNetmask("127.57.76.251"));
-        //} catch (IOException ex) {
-            //Logger.getLogger(NetworkLayer.class.getName()).log(Level.SEVERE, null, ex);
-       // }
+        } catch (IOException eConection) {
+            Logger.getLogger(NetworkLayer.class.getName()).log(Level.SEVERE, null, eConection);
+            System.err.printf("Arquivo de Rotas Vazio\n",
+                    eConection.getMessage());
+        }
 
     }
 

@@ -83,10 +83,6 @@ public class RouteTable {
         }
         return "RouteNotFound";
     }
-    
-    private static boolean andIpMask(int ip, int mask){
-        return ((ip & mask) == ip);
-    }
 
     public String[][] getRoutes() {
         return routes;
