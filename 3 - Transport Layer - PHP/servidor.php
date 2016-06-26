@@ -16,7 +16,7 @@ require_once("pacote.php");
 
 	$connection;
 	$packetRecv;
-	$keep_going;
+	$keep_going = 1;
 	while(($connection = socket_accept($socketRecv)) != FALSE) {
 		$packet = null;
 		do {
@@ -24,6 +24,7 @@ require_once("pacote.php");
 			$packet = new Pacote;
 			$packet->convert($packetRecv);
 			var_dump($packet);
+			//se for o do hanshake
 			if($packet->flags == "000010") {
 				$ack = clone $packet;
 				$ack->set($portSend, $port, "ACK", "oi");
@@ -36,7 +37,6 @@ require_once("pacote.php");
 				continue;
 			}
 
-			//socket para enviar criado com UDP para a funcionalidade ser implementada pela minha função
 			$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 			if ($socketSend === false) {
 				echo socket_strerror(socket_last_error()) . "\n";
@@ -52,8 +52,9 @@ require_once("pacote.php");
 			}
 			if(socket_write($socketSend, $packet->toString(), strlen($packet->toString())) === false) echo "Erro de envio para aplicação";
 			else echo "Enviado: ".$packet->toString();
-		} while ($packet->flags != "000001" && $packet->flags != "000000");
-
+			$keep_going ++;
+		}// while ($packet->flags != "000001" && $packet->flags != "000000");
+ while ($keep_going < 3);
 		socket_close($connection);
 	}
 

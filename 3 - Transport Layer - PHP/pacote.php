@@ -61,9 +61,7 @@ class Pacote {
     	$this->reservado = $newval;
 	}
 	public function setFlags($flag) {
-		if($flag == "SYN") $this->flags = 000010;
-		if($flag == "ACK") $this->flags = 010000;
-		if($flag == "FIN") $this->flags = 000001;
+		$this->flags = $flag;
 	}
 	public function setJanela($newval) {
     	$this->janela = $newval;

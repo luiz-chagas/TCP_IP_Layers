@@ -16,33 +16,46 @@ require_once("pacote.php");
 
 	$connection;
 	$content;
+	$bypass = false;
+	
 	while(($connection = socket_accept($socketRecv)) != FALSE) {
 		echo "Aplicação enviando\n";
 		$content = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
 
-		//socket para enviar criado com UDP para a funcionalidade ser implementada pela minha função
-		$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-		if ($socketSend === false) {
-			echo socket_strerror(socket_last_error()) . "\n";
-		} else {
-			echo "Socket criado\n";
-		}
+		$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) or die(socket_strerror(socket_last_error())."\n");
+		echo "Socket criado\n";
 
-		$result = socket_connect($socketSend, $hostSend, $portSend);
-		if ($result === false) {
-			echo socket_strerror(socket_last_error($socketSend)) . "\n";
-		} else {
-			echo "Conectado a $hostSend.\n";
-		}
+		socket_connect($socketSend, $host, $portSend) or die("Could not connect to socket");
+		
+		$result = socket_listen($socketSend) or die(socket_strerror(socket_last_error($socketSend))."\n");
+		echo "Conectado a $hostSend.\n";
+
+		$ouvindo = socket_accept($socketSend) or die(socket_strerror(socket_last_error($socketSend))."\n");
 
 		$pacote = new Pacote;
 		$pacote->set($portSend, $port, "", $content);
 		var_dump($pacote);
-		//usar essa pra UDP
-		bypass($socketSend, $pacote->toString());
-		//usar essa pra TCP
-		//bypass($socketSend, $pacote->toString());
+		
+		if($bypass) {
+			socket_write($ouvindo, $pacote->toString(), strlen($pacote->toString()));
+		} else {
+			$syn = new Pacote;
+			$syn->set($portSend, $port, "SYN", "oi");
+			echo "syn\n";
+			var_dump($syn);
+			socket_write($ouvindo, $syn->toString(), strlen($syn->toString()));
 
+			$resposta = socket_read($ouvindo, 1000000000, PHP_BINARY_READ);
+			$ackServer = new Pacote;
+			$ackServer->convert($resposta);
+
+			$ack = new Pacote;
+			$ack->set($portSend, $port, "ACK", "oi");
+			socket_write($ouvindo, $ack->toString(), strlen($ack->toString()));
+			//TODO setar o ACK e num de sequência e fazer controle de fluxo
+			socket_write($ouvindo, $pacote->toString(), strlen($pacote->toString()));
+		}
+		
 		echo "Transmissão finalizada\n";
 		socket_close($socketSend);
 
@@ -50,25 +63,4 @@ require_once("pacote.php");
 	}
 
 	socket_close($socketRecv);
-
-	function bypass($sock, $conteudo) {
-		socket_write($sock, $conteudo, strlen($conteudo));
-	}
-
-	function handshake($socket, $packet) {
-		$syn = new Pacote;
-		$syn->set($portSend, $port, "SYN", "oi");
-		socket_write($socket, $syn->toString(), strlen($syn->toString()));
-
-		$ouvindo = socket_accept($socket);
-		$resposta = socket_read($ouvindo, $lim_bytes, PHP_BINARY_READ);
-		$ackServer = new Pacote;
-		$ackServer->convert($resposta);
-
-		$ack = new Pacote;
-		$ack->set($portSend, $port, "ACK", "oi");
-		socket_write($socket, $ack, strlen($ack));
-		//TODO setar o ACK e num de sequência e fazer controle de fluxo
-		socket_write($sock, $packet, strlen($packet));
-	}
 ?>
