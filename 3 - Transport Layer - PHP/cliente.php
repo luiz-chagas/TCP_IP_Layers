@@ -33,7 +33,7 @@ require_once("pacote.php");
 		$pacote->set($portSend, $port, "", $content);
 		var_dump($pacote);
 		
-		if(!$bypass) {
+		if($bypass) {
 			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
 		} else {
 			$syn = new Pacote;
