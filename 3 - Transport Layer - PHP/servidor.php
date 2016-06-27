@@ -23,7 +23,7 @@ require_once("pacote.php");
 			$packetRecv = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
 			$packet = new Pacote;
 			$packet->convert($packetRecv);
-			var_dump($packet);
+			echo $packetRecv
 			//se for o do hanshake
 			if($packet->flags == "000010") {
 				$ack = clone $packet;
