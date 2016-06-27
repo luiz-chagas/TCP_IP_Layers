@@ -23,7 +23,7 @@ require_once("pacote.php");
 			$packetRecv = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
 			$packet = new Pacote;
 			$packet->convert($packetRecv);
-			echo $packetRecv
+			echo $packetRecv;
 			//se for o do hanshake
 			if($packet->flags == "000010") {
 				$ack = clone $packet;
@@ -44,9 +44,8 @@ require_once("pacote.php");
 			$result = socket_connect($socketSend, $hostSend, $portSend) or die(socket_strerror(socket_last_error($socketSend))."\n");
 			echo "Conectado a $hostSend.\n";
 
-			$unpacked = substr($packet->toString(), 224);
+			$unpacked = $packet->dado;
 			if(socket_write($socketSend, $unpacked, strlen($unpacked)) === false) echo "Erro de envio para aplicação";
-			else echo "Enviado: ".$unpacked;
 			$keep_going ++;
 		}// while ($packet->flags != "000001" && $packet->flags != "000000");
  while ($keep_going < 2);

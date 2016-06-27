@@ -11,8 +11,8 @@ class Pacote {
 	public $janela = "0000000000000000"; //16
 	public $checksum = "0000000000000000"; //16
 	public $urgente = "0000000000000000"; //16
-	public $opcoes = "00000000000000000000000000000000";
-	public $padding = "00000000000000000000000000000000";
+	public $opcoes = "00000000000000000000000000000000"; //32
+	public $padding = "00000000000000000000000000000000"; //32
 	public $dado = "";
 	
 	public function set($origem, $destino, $flag, $dados) {
@@ -25,7 +25,7 @@ class Pacote {
 	}
 	
 	public function convert($resposta) {
-		//$resposta = br2nl($resposta);
+		$resposta = preg_replace('/\<br(\s*)?\/?\>/i', "\n", $resposta);
 		$this->portaOrigem = substr($resposta, 0, 16);
 		$this->portaDestino = substr($resposta, 16, 16);
 		$this->sequencia = substr($resposta, 32, 32);
@@ -36,17 +36,17 @@ class Pacote {
 		$this->janela = substr($resposta, 112, 16);
 		$this->checksum = substr($resposta, 128, 16);
 		$this->urgente = substr($resposta, 144, 16);
-		$this->padding = substr($resposta, 160, 32);
-		$this->padding = substr($resposta, 92, 32);
+		$this->opcoes = substr($resposta, 160, 32);
+		$this->padding = substr($resposta, 192, 32);
 		$this->dado = substr($resposta, 224);
 	}
 	
 	public function toString() {
-		return $this->portaOrigem.$this->portaDestino.$this->sequencia.$this->ack.$this->offset.$this->reservado.$this->flags.$this->janela.$this->checksum.$this->urgente.$this->dado."\n";
+		return $this->portaOrigem.$this->portaDestino.$this->sequencia.$this->ack.$this->offset.$this->reservado.$this->flags.$this->janela.$this->checksum.$this->urgente.$this->opcoes.$this->padding.$this->dado."\n";
 	}
 	
 	public function toString2() {
-		return $this->portaOrigem."\n".$this->portaDestino."\n".$this->sequencia."\n".$this->ack."\n".$this->offset."\n".$this->reservado."\n".$this->flags."\n".$this->janela."\n".$this->checksum."\n".$this->urgente."\n".$this->dado;
+		return $this->portaOrigem."\n".$this->portaDestino."\n".$this->sequencia."\n".$this->ack."\n".$this->offset."\n".$this->reservado."\n".$this->flags."\n".$this->janela."\n".$this->checksum."\n".$this->urgente."\n".$this->opcoes."\n".$this->padding."\n".$this->dado;
 	}
 	
 	public function setPortaOrigem($newval) {
