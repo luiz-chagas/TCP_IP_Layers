@@ -52,7 +52,7 @@ require_once("pacote.php");
 			//TODO setar o ACK e num de sequência e fazer controle de fluxo
 			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
 		}
-
+        sleep(6);
 		$resposta = socket_read($socketSend, $lim_bytes, PHP_BINARY_READ);
 
 		$packet2 = new Pacote;
