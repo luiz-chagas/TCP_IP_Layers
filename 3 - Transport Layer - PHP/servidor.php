@@ -15,22 +15,22 @@ require_once("pacote.php");
 	$packetRecv;
 	$keep_going = 1;
 	$lim_bytes = 1000000000; //1 GB
-	
+
 	while(($connection = socket_accept($socketRecv)) != FALSE) {
 		$packet = null;
 		do {
-		sleep(3);
+		sleep(1);
 			$packetRecv = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
 			$packet = new Pacote;
 			$packet->convert($packetRecv);
-			
+
 			//socket pra enviar pra camada de aplicação
 			$socketSend = socket_create(AF_INET, SOCK_STREAM, SOL_TCP) or die(socket_strerror(socket_last_error())."\n");
 			echo "Socket criado\n";
 
 			$result = socket_connect($socketSend, $hostSend, $portSend) or die(socket_strerror(socket_last_error($socketSend))."\n");
 			echo "Conectado a $hostSend.\n";
-			
+
 			//se for o do hanshake
 			if($packet->flags == "000010") {
 				$ack = clone $packet;

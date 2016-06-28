@@ -17,8 +17,8 @@ require_once("pacote.php");
 	$content;
 	$lim_bytes = 1000000000; //1 GB
 	$bypass = false;
-	
-	//conexão com a aplicação
+
+	//conexão com a aplicaçãonetwork
 	while(($connection = socket_accept($socketRecv)) != FALSE) {
 		echo "Aplicação enviando\n";
 		$content = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
@@ -32,7 +32,7 @@ require_once("pacote.php");
 		$pacote = new Pacote;
 		$pacote->set($portSend, $port, "", $content);
 		var_dump($pacote);
-		
+
 		if(!$bypass) {
 			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
 		} else {
@@ -52,13 +52,13 @@ require_once("pacote.php");
 			//TODO setar o ACK e num de sequência e fazer controle de fluxo
 			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
 		}
-		
+
 		$resposta = socket_read($socketSend, $lim_bytes, PHP_BINARY_READ);
-		
+
 		$packet2 = new Pacote;
 		$packet2->convert($resposta);
 		$unpacked = $packet2->dado;
-		if(socket_write($socketRecv, $unpacked, strlen($unpacked)) === false) echo "Erro de envio para aplicação";
+		if(socket_write($connection, $unpacked, strlen($unpacked)) === false) echo "Erro de envio para aplicação";
 		//socket_close($socketSend);
 
 		//socket_close($connection);

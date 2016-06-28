@@ -242,6 +242,20 @@ int main(int argc, char **argv) {
     		}
     		fclose(p);
     	}
+        // Receiving frame
+        bzero(buffer, frame_size);
+        len = read(client_socket, buffer, frame_size);
+        if((int)len <= 0) break;
+        fprintf(stdout, "Client received %d bytes from physical.\n", (int) len);
+        printf("%s", buffer);
+        // Send message
+        len = send(network_socket, buffer, 512, 0);
+        if (len < 0) {
+            fprintf(stderr, "Error on connecting to the network --> %s", strerror(errno));
+            exit(EXIT_FAILURE);
+        }else{
+            fprintf(stdout, "Sent %ld bytes to the network\n", len);
+        }
     }
 
 	close(client_socket);
