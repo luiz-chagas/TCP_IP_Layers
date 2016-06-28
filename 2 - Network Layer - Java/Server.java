@@ -12,7 +12,7 @@ public class Server {
             DataOutputStream outToPhysical = new DataOutputStream(connectionSocket.getOutputStream());
             //recebe da física
             String answ = inFromPhysical.readLine();
-System.out.println(answ);
+
 			//socket que envia pro transporte
 		    Socket socketSend = new Socket("localhost", 11000);
 		    DataOutputStream outToTransport = new DataOutputStream(socketSend.getOutputStream());

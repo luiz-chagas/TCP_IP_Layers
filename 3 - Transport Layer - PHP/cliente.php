@@ -33,7 +33,7 @@ require_once("pacote.php");
 		$pacote->set($portSend, $port, "", $content);
 		var_dump($pacote);
 		
-		if($bypass) {
+		if(!$bypass) {
 			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
 		} else {
 			$syn = new Pacote;
@@ -53,7 +53,12 @@ require_once("pacote.php");
 			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
 		}
 		
-		echo "Transmissão finalizada\n";
+		$resposta = socket_read($socketSend, $lim_bytes, PHP_BINARY_READ);
+		
+		$packet2 = new Pacote;
+		$packet2->convert($resposta);
+		$unpacked = $packet2->dado;
+		if(socket_write($socketRecv, $unpacked, strlen($unpacked)) === false) echo "Erro de envio para aplicação";
 		//socket_close($socketSend);
 
 		//socket_close($connection);

@@ -12,7 +12,7 @@ public class Client {
             DataOutputStream outToTransport = new DataOutputStream(connectionSocket.getOutputStream());
             //recebe da camada de aplicação
             String msg = inFromTransport.readLine();
-System.out.println(msg);
+
 			//socket que envia pra física
 		    Socket socketSend = new Socket("localhost", 13001);
 		    DataOutputStream outToPhysical = new DataOutputStream(socketSend.getOutputStream());
