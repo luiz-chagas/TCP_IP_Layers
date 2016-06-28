@@ -12,13 +12,26 @@
 #include <sys/stat.h>
 #include <sys/sendfile.h>
 
+struct Frame{
+	// HEADER
+	unsigned char source[6]; // source's MAC address
+	unsigned char destination[6]; // destination's MAC address
+	unsigned char type[2];// type of protocol - 0x0800 for IPv4
+	// DATA
+	unsigned char data[494]; // 494 bytes limit for data
+	// FOOTER
+	unsigned char checksum[4];
+};
+
 int main(int argc, char **argv){
 	int server_socket;
 	int client_socket;
+    int network_socket;
 	socklen_t sock_len;
 	ssize_t len;
 	struct sockaddr_in server_addr;
 	struct sockaddr_in client_addr;
+    struct sockaddr_in network_addr;
 	int fd;
 	int frame_size;
 	FILE *received_frame;
@@ -27,14 +40,17 @@ int main(int argc, char **argv){
 	char buffer[512];
 	char filename[18];
 	int i = 0;
+    struct Frame frame1;
 
-	if(argc != 2){
-		fprintf(stderr, "Usage: server ip port_number\n");
-		exit(EXIT_FAILURE);
-	}
+	// if(argc != 2){
+	// 	fprintf(stderr, "Usage: server\n");
+	// 	exit(EXIT_FAILURE);
+	// }
 
-    ip = argv[1];
-	port_number = atoi(argv[2]);
+    //ip = argv[1];
+	//port_number = atoi(argv[2]);
+    ip = "127.0.0.1";
+    port_number = 13000;
 
 	/* Create server socket */
 	server_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -42,16 +58,31 @@ int main(int argc, char **argv){
 		fprintf(stderr, "Error creating socket --> %s", strerror(errno));
 		exit(EXIT_FAILURE);
 	}else{
-		fprintf(stdout, "Socket created successfully.\n");
+		fprintf(stdout, "Server socket created successfully.\n");
+	}
+
+    /*Create network socket*/
+    network_socket = socket(AF_INET, SOCK_STREAM, 0);
+	if (network_socket == -1){
+		fprintf(stderr, "Error creating socket --> %s", strerror(errno));
+		exit(EXIT_FAILURE);
+	}else{
+		fprintf(stdout, "Network socket created successfully.\n");
 	}
 
 	/* Zeroing server_addr struct */
 	memset(&server_addr, 0, sizeof(server_addr));
+    memset(&network_addr, 0, sizeof(network_addr));
 
 	/* Construct server_addr struct */
 	server_addr.sin_family = AF_INET;
 	inet_pton(AF_INET, ip, &(server_addr.sin_addr));
 	server_addr.sin_port = htons(port_number);
+
+    /* Construct network_addr struct */
+	network_addr.sin_family = AF_INET;
+	inet_pton(AF_INET, ip, &(network_addr.sin_addr));
+	network_addr.sin_port = htons(12000);
 
 	/* Bind */
 	if ((bind(server_socket, (struct sockaddr *)&server_addr, sizeof(struct sockaddr))) == -1){
@@ -94,14 +125,32 @@ int main(int argc, char **argv){
 			sprintf(filename, "ReceivedFrame%05d",i++);
 			received_frame = fopen(filename, "w");
 			if (received_frame == NULL){
-				fprintf(stderr, "Failed to open file foo --> %s\n", strerror(errno));
+				fprintf(stderr, "Failed to create file --> %s\n", strerror(errno));
 				exit(EXIT_FAILURE);
 			}
 			fwrite(buffer, sizeof(char), len, received_frame);
-
 			fprintf(stdout, "Server received %d bytes.\n", (int) len);
 
-			fclose(received_frame);
+            memcpy(frame1.data, &buffer[14], 494 );
+
+            fclose(received_frame);
+
+            //Send frame1->data to Network layer
+            if (connect(network_socket, (struct sockaddr *)&network_addr, sizeof(struct sockaddr)) == -1) {
+        		fprintf(stderr, "Error on connect --> %s\n", strerror(errno));
+        		exit(EXIT_FAILURE);
+        	}else{
+        		fprintf(stdout, "Connection to network established on port %d.\n", 12000);
+        	}
+            // Send message
+            sprintf(buffer, "%s", frame1.data);
+        	len = send(network_socket, buffer, 494, 0);
+        	if (len < 0) {
+        		fprintf(stderr, "Error on connecting to the network --> %s", strerror(errno));
+        		exit(EXIT_FAILURE);
+        	}else{
+        		fprintf(stdout, "Sent %ld bytes to the network\n", len);
+        	}
 		}
 		close(client_socket);
 	}
