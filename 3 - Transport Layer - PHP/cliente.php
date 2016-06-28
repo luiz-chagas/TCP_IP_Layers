@@ -31,26 +31,27 @@ require_once("pacote.php");
 
 		$pacote = new Pacote;
 		$pacote->set($portSend, $port, "", $content);
-		var_dump($pacote);
 
 		if(!$bypass) {
 			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
 		} else {
 			$syn = new Pacote;
-			$syn->set($portSend, $port, "SYN", "oi");
-			echo "syn\n";
-			var_dump($syn);
+			$syn->set($portSend, $port, "SYN", "oisyn");
 			socket_write($socketSend, $syn->toString(), strlen($syn->toString()));
 
+			sleep(10);
 			$resposta = socket_read($socketSend, $lim_bytes, PHP_BINARY_READ);
 			$ackServer = new Pacote;
 			$ackServer->convert($resposta);
 
 			$ack = new Pacote;
-			$ack->set($portSend, $port, "ACK", "oi");
+			$ack->set($portSend, $port, "ACK", "oiack");
 			socket_write($socketSend, $ack->toString(), strlen($ack->toString()));
 			//TODO setar o ACK e num de sequência e fazer controle de fluxo
-			socket_write($socketSend, $pacote->toString(), strlen($pacote->toString()));
+			
+			sleep(1);
+			if(socket_write($socketSend, $pacote->toString(), strlen($pacote->toString())) === false) echo "Erro de envio para aplicação";
+			else echo "escreveu ack";
 		}
         sleep(6);
 		$resposta = socket_read($socketSend, $lim_bytes, PHP_BINARY_READ);

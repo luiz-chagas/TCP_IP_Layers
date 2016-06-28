@@ -34,12 +34,14 @@ require_once("pacote.php");
 			//se for o do hanshake
 			if($packet->flags == "000010") {
 				$ack = clone $packet;
-				$ack->set($portSend, $port, "ACK", "oi");
+				$ack->set($portSend, $port, "ACK", "oiserver");
 				socket_write($connection, $ack->toString(), strlen($ack->toString()));
 
-				$resposta = socket_read($socketRecv, $lim_bytes, PHP_BINARY_READ);
+				sleep(12);
+				$resposta = socket_read($connection, $lim_bytes, PHP_BINARY_READ);
 				$ackClient = new Pacote;
 				$ackClient->convert($resposta);
+				var_dump($ackClient);
 				continue;
 			}
 
@@ -53,8 +55,8 @@ require_once("pacote.php");
 
 			if(socket_write($connection, $packet2->toString(), strlen($packet2->toString())) === false) echo "Erro de envio para transporte";
 			$keep_going ++;
-		}// while ($packet->flags != "000001" && $packet->flags != "000000");
- while ($keep_going < 5);
+		} while ($packet->flags != "000001" && $packet->flags != "000000");
+ //while ($keep_going < 5);
 		//socket_close($connection);
 	}
 
